@@ -1,0 +1,33 @@
+name: Update RSS Dashboard
+
+on:
+  schedule:
+    # This CRON expression tells GitHub to run this script automatically every hour
+    - cron: '0 * * * *'
+  workflow_dispatch: # This allows you to manually trigger the run using a button
+
+permissions:
+  contents: write # Grants the workflow permission to push changes back to your repository
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v4
+
+    - name: Set up Python environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Run RSS fetch script
+      run: python fetch_rss.py
+
+    - name: Commit and push updated index.html
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@://github.com"
+        git add index.html
+        git commit -m "Automated RSS update" || exit 0
+        git push

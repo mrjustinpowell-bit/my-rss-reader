@@ -1,9 +1,10 @@
 import urllib.request
 import xml.etree.ElementTree as ET
+import re
 
 # 1. Define your favorite RSS feeds here
 FEEDS = {
-    "BBC News": "http://bbci.co.uk",
+    "BBC News": "http://feeds.bbci.co.uk/news/rss.xml",
     "Hacker News": "https://ycombinator.com"
 }
 
@@ -25,15 +26,23 @@ html_content = """
     <h1>My RSS Dashboard</h1>
 """
 
+# Regular expression to strip out non-XML compatible control characters
+RE_XML_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe\uffff])'
+
 for source_name, url in FEEDS.items():
     html_content += f"<div class='feed-section'><h2>{source_name}</h2>"
     try:
-        # Fetch and parse the XML content without external dependencies
+        # Fetch the XML content
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req) as response:
-            xml_data = response.read()
+            xml_data = response.read().decode('utf-8', errors='ignore')
         
-        root = ET.fromstring(xml_data)
+        # Clean the data: remove illegal characters that crash ElementTree
+        cleaned_xml = re.sub(RE_XML_ILLEGAL, "", xml_data)
+        
+        # Parse the cleaned string
+        root = ET.fromstring(cleaned_xml)
+        
         # Extract the first 5 articles from each feed
         items = root.findall('.//item')[:5]
         

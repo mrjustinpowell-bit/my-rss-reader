@@ -1,6 +1,5 @@
 import urllib.request
-import xml.etree.ElementTree as ET
-import re
+from bs4 import BeautifulSoup
 
 # 1. Define your favorite RSS feeds here
 FEEDS = {
@@ -26,32 +25,24 @@ html_content = """
     <h1>My RSS Dashboard</h1>
 """
 
-# Regular expression to strip out non-XML compatible control characters
-RE_XML_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe\uffff])'
-
 for source_name, url in FEEDS.items():
     html_content += f"<div class='feed-section'><h2>{source_name}</h2>"
     try:
-        # Fetch the XML content
+        # Fetch the XML content from the source
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req) as response:
-            xml_data = response.read().decode('utf-8', errors='ignore')
+            raw_data = response.read()
         
-        # Clean the data: remove illegal characters that crash ElementTree
-        cleaned_xml = re.sub(RE_XML_ILLEGAL, "", xml_data)
-        
-        # Parse the cleaned string
-        root = ET.fromstring(cleaned_xml)
-        
-        # Extract the first 5 articles from each feed
-        items = root.findall('.//item')[:5]
+        # Use BeautifulSoup with the 'xml' parser features to auto-heal broken markup and unescaped tokens
+        soup = BeautifulSoup(raw_data, 'xml')
+        items = soup.find_all('item')[:5]
         
         if not items:
             html_content += "<p>No articles found.</p>"
             
         for item in items:
-            title = item.find('title').text if item.find('title') is not None else "No Title"
-            link = item.find('link').text if item.find('link') is not None else "#"
+            title = item.find('title').text if item.find('title') else "No Title"
+            link = item.find('link').text if item.find('link') else "#"
             html_content += f"<div class='item'><a href='{link}' target='_blank'>{title}</a></div>"
             
     except Exception as e:

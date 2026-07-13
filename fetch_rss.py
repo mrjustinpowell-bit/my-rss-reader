@@ -4,7 +4,8 @@ from bs4 import BeautifulSoup
 # 1. Define your favorite RSS feeds here
 FEEDS = {
     "BBC News": "http://bbci.co.uk",
-    "Hacker News": "https://ycombinator.com"
+    "Hacker News": "https://ycombinator.com",
+    "Gorilla vs. Bear":"https://www.gorillavsbear.net"
 }
 
 html_content = """

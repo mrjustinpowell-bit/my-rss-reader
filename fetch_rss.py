@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 # 1. Define your favorite RSS feeds here
 FEEDS = {
-    "BBC News": "http://feeds.bbci.co.uk/news/rss.xml",
+    "BBC News": "http://bbci.co.uk",
     "Hacker News": "https://ycombinator.com"
 }
 
@@ -33,8 +33,8 @@ for source_name, url in FEEDS.items():
         with urllib.request.urlopen(req) as response:
             raw_data = response.read()
         
-        # Use BeautifulSoup with the 'xml' parser features to auto-heal broken markup and unescaped tokens
-        soup = BeautifulSoup(raw_data, 'xml')
+        # Explicitly using 'lxml-xml' forces the structural repair engine to handle unescaped elements
+        soup = BeautifulSoup(raw_data, 'lxml-xml')
         items = soup.find_all('item')[:5]
         
         if not items:

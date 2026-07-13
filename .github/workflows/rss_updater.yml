@@ -2,24 +2,26 @@ name: Update RSS Dashboard
 
 on:
   schedule:
-    # This CRON expression tells GitHub to run this script automatically every hour
     - cron: '0 * * * *'
-  workflow_dispatch: # This allows you to manually trigger the run using a button
+  workflow_dispatch:
 
 permissions:
-  contents: write # Grants the workflow permission to push changes back to your repository
+  contents: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v5 # Upgraded from v4 to use the Node 24 runtime natively
+      uses: actions/checkout@v5
 
     - name: Set up Python environment
-      uses: actions/setup-python@v6 # Upgraded from v5 to use the Node 24 runtime natively
+      uses: actions/setup-python@v6
       with:
         python-version: '3.x'
+
+    - name: Install dependencies
+      run: pip install beautifulsoup4 lxml # Added to automatically repair broken XML/HTML structures
 
     - name: Run RSS fetch script
       run: python fetch_rss.py
